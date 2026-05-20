@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Доска почёта · Республика Реметия</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, #f0f4ec 0%, #e2e8db 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .flag-bar {
+            height: 6px;
+            background: linear-gradient(90deg, #2b7a3e 33%, #f4c542 34%, #f4c542 66%, #9b2c2c 67%);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+        }
+
+        .container {
+            max-width: 1300px;
+            margin: 50px auto 30px;
+            padding: 0 15px;
+        }
+
+        .nav-back {
+            display: inline-block;
+            margin-bottom: 20px;
+            background: #9b2c2c;
+            padding: 8px 24px;
+            border-radius: 40px;
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        .nav-back:hover {
+            background: #7a2222;
+        }
+
+        .card {
+            background: white;
+            border-radius: 40px;
+            padding: 35px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+        }
+
+        h1 {
+            color: #2b7a3e;
+            font-size: 2rem;
+            margin-bottom: 10px;
+            border-left: 6px solid #f4c542;
+            padding-left: 25px;
+        }
+
+        .subtitle {
+            color: #6a7c5c;
+            margin-bottom: 30px;
+            padding-left: 31px;
+        }
+
+        .stats {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .stat-card {
+            background: #f8f3e0;
+            border-radius: 28px;
+            padding: 15px 25px;
+            text-align: center;
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #2b7a3e;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: #6a7c5c;
+        }
+
+        .honor-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+        }
+
+        .honor-table th {
+            background: #2b7a3e;
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: bold;
+        }
+
+        .honor-table th:first-child {
+            border-radius: 20px 0 0 0;
+        }
+
+        .honor-table th:last-child {
+            border-radius: 0 20px 0 0;
+        }
+
+        .honor-table td {
+            padding: 14px 15px;
+            border-bottom: 1px solid #e0ebd6;
+        }
+
+        .honor-table tr:hover {
+            background: #f9fbf6;
+        }
+
+        .rank-1 {
+            background: #f4c54220;
+            font-weight: bold;
+        }
+
+        .medal {
+            font-size: 1.3rem;
+        }
+
+        .points {
+            font-weight: bold;
+            color: #2b7a3e;
+        }
+
+        /* Скрытая админ-панель */
+        .admin-panel {
+            margin-top: 35px;
+            padding-top: 25px;
+            border-top: 2px dashed #e0ebd6;
+            display: none;
+        }
+
+        .admin-panel.show {
+            display: block;
+        }
+
+        .admin-panel h3 {
+            color: #9b2c2c;
+            margin-bottom: 15px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+
+        .form-row input {
+            flex: 1;
+            padding: 12px 18px;
+            border: 1px solid #cbdcc0;
+            border-radius: 60px;
+            font-size: 0.9rem;
+        }
+
+        .admin-toggle {
+            text-align: right;
+            margin-bottom: 10px;
+        }
+
+        .admin-toggle button {
+            background: none;
+            border: none;
+            color: #aaa;
+            font-size: 0.7rem;
+            cursor: pointer;
+            padding: 5px 10px;
+        }
+
+        .admin-toggle button:hover {
+            color: #9b2c2c;
+        }
+
+        button {
+            background: #2b7a3e;
+            color: white;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 60px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.15s;
+        }
+
+        button.secondary {
+            background: #f4c542;
+            color: #2d2b1f;
+        }
+
+        .footer-note {
+            text-align: center;
+            margin-top: 30px;
+            color: #6a7c5c;
+            font-size: 0.8rem;
+        }
+
+        /* Модальное окно для ввода кода */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 48px;
+            padding: 35px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+        }
+
+        .modal-content h3 {
+            color: #2b7a3e;
+            margin-bottom: 20px;
+        }
+
+        .modal-content input {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid #cbdcc0;
+            border-radius: 60px;
+            font-size: 1rem;
+            margin: 15px 0;
+            text-align: center;
+            letter-spacing: 2px;
+        }
+
+        .modal-content button {
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .error-msg {
+            color: #9b2c2c;
+            font-size: 0.8rem;
+            margin-top: 10px;
+        }
+
+        @media (max-width: 700px) {
+            .honor-table th, .honor-table td {
+                padding: 10px 8px;
+                font-size: 0.8rem;
+            }
+            .card {
+                padding: 20px;
+            }
+            h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="flag-bar"></div>
+<div class="container">
+    <a href="index.html" class="nav-back">← На главную Реметии</a>
+    
+    <div class="card">
+        <h1>🏆 Доска почёта</h1>
+        <div class="subtitle">Граждане, внёсшие выдающийся вклад в развитие Республики Реметия</div>
+
+        <!-- Статистика -->
+        <div class="stats" id="statsPanel"></div>
+
+        <!-- Таблица награждённых -->
+        <div style="overflow-x: auto;">
+            <table class="honor-table" id="honorTable">
+                <thead>
+                    <tr>
+                        <th>🏅 Место</th>
+                        <th>👤 Гражданин</th>
+                        <th>🏆 Награда / Звание</th>
+                        <th>📅 Дата</th>
+                        <th>⭐ Очки</th>
+                        <th>📝 Основание</th>
+                    </tr>
+                </thead>
+                <tbody id="honorBody"></tbody>
+            </table>
+        </div>
+
+        <!-- Скрытая кнопка для вызова админ-панели (без подсказок) -->
+        <div class="admin-toggle">
+            <button id="openAdminModalBtn" style="background: none; color: #ccc; font-size: 0.6rem;">🔒</button>
+        </div>
+
+        <!-- Админ-панель (появляется только после ввода кода) -->
+        <div id="adminPanel" class="admin-panel">
+            <h3>➕ Админ-панель: Добавить награждённого</h3>
+            <div class="form-row">
+                <input type="text" id="newUsername" placeholder="Имя гражданина (никнейм)">
+                <input type="text" id="newTitle" placeholder="Награда / Звание">
+                <input type="text" id="newReason" placeholder="За какие заслуги?">
+                <input type="number" id="newPoints" placeholder="Очки (например: 100)" value="100">
+            </div>
+            <button id="addHonorBtn">🏅 Добавить на доску почёта</button>
+            <button id="resetDefaultBtn" class="secondary" style="margin-left: 10px;">🔄 Сбросить к стандартным</button>
+        </div>
+    </div>
+    <div class="footer-note">
+        ⭐ Доска почёта обновляется ежемесячно. Каждый гражданин может предложить кандидата президенту.
+    </div>
+</div>
+
+<!-- Модальное окно для ввода секретного кода -->
+<div id="adminModal" class="modal">
+    <div class="modal-content">
+        <h3>🔐 Доступ к админ-панели</h3>
+        <p>Введите секретный код администратора</p>
+        <input type="password" id="secretCode" placeholder="********" autocomplete="off">
+        <button id="submitCodeBtn">Подтвердить</button>
+        <button id="closeModalBtn" class="secondary" style="margin-top: 10px;">Отмена</button>
+        <div id="modalError" class="error-msg"></div>
+    </div>
+</div>
+
+<script>
+    // ============================================================
+    // 🔐 СЕКРЕТНЫЙ КОД АДМИНИСТРАТОРА (измените на свой)
+    // ============================================================
+    const ADMIN_SECRET_CODE = "79032270684admin67";
+    
+    // Флаг доступа к админ-панели (хранится в sessionStorage, закрывается при закрытии вкладки)
+    let isAdminAuthorized = sessionStorage.getItem('remetia_admin_auth') === 'true';
+    
+    // ============================================================
+    // СПИСОК НАГРАЖДЁННЫХ (ДОБАВЛЯЙТЕ СЮДА НОВЫХ ГРАЖДАН)
+    // ============================================================
+    const DEFAULT_HONOR_LIST = [
+        {
+            username: "Арина_Светлова",
+            title: "Президент-основатель",
+            awardDate: "2025-05-12",
+            points: 500,
+            reason: "За создание и развитие Республики Реметия"
+        },
+        {
+            username: "Генерал_Ветер",
+            title: "Герой обороны",
+            awardDate: "2025-10-01",
+            points: 300,
+            reason: "За защиту киберграниц и организацию военных учений"
+        },
+        {
+            username: "Мэр_Ремсити",
+            title: "Строитель года",
+            awardDate: "2026-01-15",
+            points: 200,
+            reason: "Развитие IT-инфраструктуры и цифровых сервисов"
+        },
+        {
+            username: "Гражданин_Реметии",
+            title: "Активный участник",
+            awardDate: "2026-03-20",
+            points: 80,
+            reason: "Участие в 5 государственных мероприятиях"
+        },
+        {
+            username: "Любомир_Ремет",
+            title: "Народный поэт",
+            awardDate: "2026-04-10",
+            points: 120,
+            reason: "За создание гимна и стихов о Реметии"
+        },
+        {
+            username: "Екатерина_Мудрая",
+            title: "Заслуженный юрист",
+            awardDate: "2026-05-01",
+            points: 150,
+            reason: "За разработку Конституции и правовой системы"
+        },
+        {
+            username: "Артём_Кибер",
+            title: "Хранитель данных",
+            awardDate: "2026-05-15",
+            points: 110,
+            reason: "За обеспечение кибербезопасности государства"
+        },
+        {
+            username: "София_Зелёная",
+            title: "Эко-лидер",
+            awardDate: "2026-05-20",
+            points: 95,
+            reason: "За программу озеленения виртуальных территорий"
+        }
+        // ⬇️⬇️⬇️ ДОБАВЛЯЙТЕ НОВЫХ ГРАЖДАН СЮДА ⬇️⬇️⬇️
+    ];
+
+    // Ключ для localStorage
+    const STORAGE_HONOR = 'remetia_honor_board';
+
+    function getHonorList() {
+        const saved = localStorage.getItem(STORAGE_HONOR);
+        if (saved) {
+            return JSON.parse(saved);
+        }
+        return JSON.parse(JSON.stringify(DEFAULT_HONOR_LIST));
+    }
+
+    function saveHonorList(list) {
+        localStorage.setItem(STORAGE_HONOR, JSON.stringify(list));
+    }
+
+    function addHonor(username, title, reason, points) {
+        const list = getHonorList();
+        const newEntry = {
+            username: username.trim(),
+            title: title.trim(),
+            awardDate: new Date().toISOString().slice(0, 10),
+            points: parseInt(points) || 50,
+            reason: reason.trim() || "За заслуги перед Реметией"
+        };
+        list.push(newEntry);
+        saveHonorList(list);
+        renderHonor();
+    }
+
+    function resetToDefault() {
+        if (confirm('Сбросить доску почёта к стандартному списку? Все добавленные вручную записи будут удалены.')) {
+            saveHonorList(JSON.parse(JSON.stringify(DEFAULT_HONOR_LIST)));
+            renderHonor();
+        }
+    }
+
+    function renderHonor() {
+        const list = getHonorList();
+        const sorted = [...list].sort((a, b) => b.points - a.points);
+        
+        const totalCount = list.length;
+        const totalPoints = list.reduce((sum, item) => sum + item.points, 0);
+        const avgPoints = totalCount > 0 ? (totalPoints / totalCount).toFixed(0) : 0;
+        
+        document.getElementById('statsPanel').innerHTML = `
+            <div class="stat-card">
+                <div class="stat-number">${totalCount}</div>
+                <div class="stat-label">🏅 Награждённых</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">${totalPoints}</div>
+                <div class="stat-label">⭐ Всего очков</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">${avgPoints}</div>
+                <div class="stat-label">📊 Средний рейтинг</div>
+            </div>
+        `;
+        
+        const tbody = document.getElementById('honorBody');
+        tbody.innerHTML = '';
+        
+        sorted.forEach((item, index) => {
+            const row = tbody.insertRow();
+            row.className = index === 0 ? 'rank-1' : '';
+            
+            if (index === 0) row.insertCell(0).innerHTML = '<span class="medal">🥇 1</span>';
+            else if (index === 1) row.insertCell(0).innerHTML = '<span class="medal">🥈 2</span>';
+            else if (index === 2) row.insertCell(0).innerHTML = '<span class="medal">🥉 3</span>';
+            else row.insertCell(0).innerHTML = `${index + 1}`;
+            
+            row.insertCell(1).innerHTML = `<strong>${item.username}</strong>`;
+            row.insertCell(2).innerHTML = item.title;
+            row.insertCell(3).innerHTML = item.awardDate;
+            row.insertCell(4).innerHTML = `<span class="points">${item.points}</span>`;
+            row.insertCell(5).innerHTML = item.reason;
+        });
+        
+        // Показываем/скрываем админ-панель в зависимости от авторизации
+        const adminPanel = document.getElementById('adminPanel');
+        if (isAdminAuthorized) {
+            adminPanel.classList.add('show');
+        } else {
+            adminPanel.classList.remove('show');
+        }
+    }
+    
+    // Модальное окно с кодом
+    const modal = document.getElementById('adminModal');
+    
+    function openAdminModal() {
+        modal.style.display = 'flex';
+        document.getElementById('secretCode').value = '';
+        document.getElementById('modalError').innerText = '';
+    }
+    
+    function closeAdminModal() {
+        modal.style.display = 'none';
+    }
+    
+    function checkSecretCode() {
+        const code = document.getElementById('secretCode').value;
+        if (code === ADMIN_SECRET_CODE) {
+            isAdminAuthorized = true;
+            sessionStorage.setItem('remetia_admin_auth', 'true');
+            closeAdminModal();
+            renderHonor(); // перерендер покажет админ-панель
+            alert('🔓 Админ-панель разблокирована! Теперь вы можете добавлять награждённых.');
+        } else {
+            document.getElementById('modalError').innerText = '❌ Неверный код доступа';
+        }
+    }
+    
+    function attachEvents() {
+        document.getElementById('addHonorBtn').onclick = () => {
+            if (!isAdminAuthorized) {
+                alert('Нет доступа! Введите секретный код.');
+                openAdminModal();
+                return;
+            }
+            const username = document.getElementById('newUsername').value;
+            const title = document.getElementById('newTitle').value;
+            const reason = document.getElementById('newReason').value;
+            const points = document.getElementById('newPoints').value;
+            
+            if (!username || !title) {
+                alert('Заполните имя гражданина и название награды!');
+                return;
+            }
+            
+            addHonor(username, title, reason, points);
+            
+            document.getElementById('newUsername').value = '';
+            document.getElementById('newTitle').value = '';
+            document.getElementById('newReason').value = '';
+            document.getElementById('newPoints').value = '100';
+            
+            alert(`✅ ${username} добавлен(а) на доску почёта!`);
+        };
+        
+        document.getElementById('resetDefaultBtn').onclick = () => {
+            if (!isAdminAuthorized) {
+                alert('Нет доступа! Введите секретный код.');
+                openAdminModal();
+                return;
+            }
+            resetToDefault();
+        };
+        
+        document.getElementById('openAdminModalBtn').onclick = openAdminModal;
+        document.getElementById('submitCodeBtn').onclick = checkSecretCode;
+        document.getElementById('closeModalBtn').onclick = closeAdminModal;
+        
+        // Закрытие по клику вне модального окна
+        window.onclick = (e) => {
+            if (e.target === modal) closeAdminModal();
+        };
+        
+        // Enter в поле ввода кода
+        document.getElementById('secretCode').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') checkSecretCode();
+        });
+    }
+    
+    function init() {
+        renderHonor();
+        attachEvents();
+    }
+    
+    init();
+</script>
+</body>
+</html>
