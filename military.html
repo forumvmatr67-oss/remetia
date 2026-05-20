@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Управление · Армия и должности Реметии</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, #e8efdf 0%, #d4dec9 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .flag-bar {
+            height: 6px;
+            background: linear-gradient(90deg, #2b7a3e 33%, #f4c542 34%, #f4c542 66%, #9b2c2c 67%);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+        }
+
+        .container {
+            max-width: 1300px;
+            margin: 50px auto 30px;
+            padding: 0 15px;
+        }
+
+        .nav-back {
+            display: inline-block;
+            margin-bottom: 20px;
+            background: #9b2c2c;
+            padding: 8px 24px;
+            border-radius: 40px;
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        .nav-back:hover {
+            background: #7a2222;
+        }
+
+        .card {
+            background: white;
+            border-radius: 40px;
+            padding: 35px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+        }
+
+        h1 {
+            color: #2b7a3e;
+            font-size: 2rem;
+            margin-bottom: 10px;
+            border-left: 6px solid #9b2c2c;
+            padding-left: 25px;
+        }
+
+        .subtitle {
+            color: #6a7c5c;
+            margin-bottom: 30px;
+            padding-left: 31px;
+        }
+
+        .stats {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .stat-card {
+            background: #f8f3e0;
+            border-radius: 28px;
+            padding: 15px 25px;
+            text-align: center;
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #9b2c2c;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: #6a7c5c;
+        }
+
+        .military-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+        }
+
+        .military-table th {
+            background: #9b2c2c;
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: bold;
+        }
+
+        .military-table th:first-child {
+            border-radius: 20px 0 0 0;
+        }
+
+        .military-table th:last-child {
+            border-radius: 0 20px 0 0;
+        }
+
+        .military-table td {
+            padding: 14px 15px;
+            border-bottom: 1px solid #e0ebd6;
+            vertical-align: middle;
+        }
+
+        .military-table tr:hover {
+            background: #f9fbf6;
+        }
+
+        .rank-high {
+            color: #9b2c2c;
+            font-weight: bold;
+        }
+
+        .delete-btn {
+            background: #9b2c2c;
+            color: white;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 40px;
+            cursor: pointer;
+            font-size: 0.7rem;
+            font-weight: bold;
+            transition: 0.15s;
+        }
+
+        .delete-btn:hover {
+            background: #7a2222;
+        }
+
+        .admin-panel {
+            margin-top: 35px;
+            padding-top: 25px;
+            border-top: 2px dashed #e0ebd6;
+            display: none;
+        }
+
+        .admin-panel.show {
+            display: block;
+        }
+
+        .admin-panel h3 {
+            color: #9b2c2c;
+            margin-bottom: 15px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+
+        .form-row input, .form-row select {
+            flex: 1;
+            padding: 12px 18px;
+            border: 1px solid #cbdcc0;
+            border-radius: 60px;
+            font-size: 0.9rem;
+            background: white;
+        }
+
+        .admin-toggle {
+            text-align: right;
+            margin-bottom: 10px;
+        }
+
+        .admin-toggle button {
+            background: none;
+            border: none;
+            color: #ccc;
+            font-size: 0.6rem;
+            cursor: pointer;
+            padding: 5px 10px;
+        }
+
+        .admin-toggle button:hover {
+            color: #9b2c2c;
+        }
+
+        button {
+            background: #9b2c2c;
+            color: white;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 60px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.15s;
+        }
+
+        button.secondary {
+            background: #f4c542;
+            color: #2d2b1f;
+        }
+
+        button.green {
+            background: #2b7a3e;
+        }
+
+        .footer-note {
+            text-align: center;
+            margin-top: 30px;
+            color: #6a7c5c;
+            font-size: 0.8rem;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 48px;
+            padding: 35px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+        }
+
+        .modal-content h3 {
+            color: #2b7a3e;
+            margin-bottom: 20px;
+        }
+
+        .modal-content input {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid #cbdcc0;
+            border-radius: 60px;
+            font-size: 1rem;
+            margin: 15px 0;
+            text-align: center;
+            letter-spacing: 2px;
+        }
+
+        .modal-content button {
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .error-msg {
+            color: #9b2c2c;
+            font-size: 0.8rem;
+            margin-top: 10px;
+        }
+
+        .rank-badge {
+            background: #2b7a3e20;
+            padding: 4px 12px;
+            border-radius: 40px;
+            font-size: 0.8rem;
+            display: inline-block;
+        }
+
+        @media (max-width: 700px) {
+            .military-table th, .military-table td {
+                padding: 8px 6px;
+                font-size: 0.7rem;
+            }
+            .delete-btn {
+                padding: 4px 8px;
+                font-size: 0.6rem;
+            }
+            .card {
+                padding: 20px;
+            }
+            h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="flag-bar"></div>
+<div class="container">
+    <a href="index.html" class="nav-back">← На главную Реметии</a>
+    
+    <div class="card">
+        <h1>⚔️ Управление · Армия и должности</h1>
+        <div class="subtitle">Военнослужащие и управляющие Республики Реметия</div>
+
+        <div class="stats" id="statsPanel"></div>
+
+        <div style="overflow-x: auto;">
+            <table class="military-table" id="militaryTable">
+                <thead>
+                    <tr>
+                        <th>👤 Имя</th>
+                        <th>⭐ Должность / Звание</th>
+                        <th>📂 Подразделение</th>
+                        <th>📅 Дата назначения</th>
+                        <th>📊 Статус</th>
+                        <th id="deleteColHeader" style="display: none;">🗑️</th>
+                    </tr>
+                </thead>
+                <tbody id="militaryBody"></tbody>
+            </table>
+        </div>
+
+        <div class="admin-toggle">
+            <button id="openAdminModalBtn" style="background: none; color: #ccc; font-size: 0.6rem;">🔒</button>
+        </div>
+
+        <div id="adminPanel" class="admin-panel">
+            <h3>➕ Админ-панель: Добавить должность</h3>
+            <div class="form-row">
+                <input type="text" id="newUsername" placeholder="Имя (никнейм)">
+                <input type="text" id="newRank" placeholder="Должность / Звание">
+                <input type="text" id="newDivision" placeholder="Подразделение (Генштаб, Кибервойска...)">
+                <select id="newStatus">
+                    <option value="действительный">✅ Действительный</option>
+                    <option value="резерв">📋 Резерв</option>
+                    <option value="почетный">🏅 Почётный</option>
+                </select>
+            </div>
+            <button id="addMilitaryBtn" class="green">➕ Добавить</button>
+            <button id="resetDefaultBtn" class="secondary" style="margin-left: 10px;">🔄 Сбросить к стандартным</button>
+        </div>
+    </div>
+    <div class="footer-note">
+        ⚡ Все военнослужащие подчиняются Верховному главнокомандующему. Кибервойска, сухопутная милиция и флот дронов.
+    </div>
+</div>
+
+<div id="adminModal" class="modal">
+    <div class="modal-content">
+        <h3>🔐 Доступ к управлению</h3>
+        <p>Введите секретный код администратора</p>
+        <input type="password" id="secretCode" placeholder="********" autocomplete="off">
+        <button id="submitCodeBtn">Подтвердить</button>
+        <button id="closeModalBtn" class="secondary" style="margin-top: 10px;">Отмена</button>
+        <div id="modalError" class="error-msg"></div>
+    </div>
+</div>
+
+<script>
+    // ============================================================
+    // 🔐 СЕКРЕТНЫЙ КОД АДМИНИСТРАТОРА
+    // ============================================================
+    const ADMIN_SECRET_CODE = "79032270684admin67";
+    
+    let isAdminAuthorized = sessionStorage.getItem('remetia_military_auth') === 'true';
+    
+    // ============================================================
+    // СПИСОК ВОЕННЫХ И УПРАВЛЯЮЩИХ (РЕДАКТИРУЙТЕ ЗДЕСЬ)
+    // ============================================================
+    const DEFAULT_MILITARY_LIST = [
+        {
+            id: "1",
+            username: "Арина_Светлова",
+            rank: "Верховный главнокомандующий",
+            division: "Генеральный штаб",
+            joinDate: "2025-05-12",
+            status: "действительный"
+        },
+        {
+            id: "2",
+            username: "Генерал_Ветер",
+            rank: "Генерал армии",
+            division: "Сухопутные войска",
+            joinDate: "2025-06-01",
+            status: "действительный"
+        },
+        {
+            id: "3",
+            username: "Полковник_Гром",
+            rank: "Полковник",
+            division: "Кибервойска",
+            joinDate: "2025-08-15",
+            status: "действительный"
+        },
+        {
+            id: "4",
+            username: "Майор_Стрелец",
+            rank: "Майор",
+            division: "Разведка",
+            joinDate: "2025-10-20",
+            status: "действительный"
+        },
+        {
+            id: "5",
+            username: "Капитан_Мореход",
+            rank: "Капитан",
+            division: "Флот дронов",
+            joinDate: "2026-01-10",
+            status: "действительный"
+        },
+        {
+            id: "6",
+            username: "Лейтенант_Искра",
+            rank: "Лейтенант",
+            division: "Связь и IT",
+            joinDate: "2026-02-14",
+            status: "действительный"
+        },
+        {
+            id: "7",
+            username: "Прапорщик_Тихий",
+            rank: "Прапорщик",
+            division: "Тыловое обеспечение",
+            joinDate: "2026-03-01",
+            status: "резерв"
+        },
+        {
+            id: "8",
+            username: "Советник_Мудров",
+            rank: "Государственный советник",
+            division: "Администрация президента",
+            joinDate: "2025-07-22",
+            status: "действительный"
+        },
+        {
+            id: "9",
+            username: "Министр_Эконом",
+            rank: "Министр экономики",
+            division: "Правительство",
+            joinDate: "2025-09-01",
+            status: "действительный"
+        }
+        // ⬇️ ДОБАВЛЯЙТЕ НОВЫХ СЮДА ⬇️
+    ];
+
+    const STORAGE_MILITARY = 'remetia_military_list';
+
+    function getMilitaryList() {
+        const saved = localStorage.getItem(STORAGE_MILITARY);
+        if (saved) {
+            return JSON.parse(saved);
+        }
+        return JSON.parse(JSON.stringify(DEFAULT_MILITARY_LIST));
+    }
+
+    function saveMilitaryList(list) {
+        localStorage.setItem(STORAGE_MILITARY, JSON.stringify(list));
+    }
+
+    function addMilitary(username, rank, division, status) {
+        const list = getMilitaryList();
+        const newId = Date.now().toString();
+        const newEntry = {
+            id: newId,
+            username: username.trim(),
+            rank: rank.trim(),
+            division: division.trim() || "Общевойсковое",
+            joinDate: new Date().toISOString().slice(0, 10),
+            status: status || "действительный"
+        };
+        list.push(newEntry);
+        saveMilitaryList(list);
+        renderMilitary();
+    }
+
+    function deleteMilitaryById(id) {
+        const list = getMilitaryList();
+        const newList = list.filter(item => item.id !== id);
+        saveMilitaryList(newList);
+        renderMilitary();
+    }
+
+    function resetToDefault() {
+        if (confirm('Сбросить список военных и управляющих к стандартному? Все добавленные вручную записи будут удалены.')) {
+            saveMilitaryList(JSON.parse(JSON.stringify(DEFAULT_MILITARY_LIST)));
+            renderMilitary();
+        }
+    }
+
+    function getStatusBadge(status) {
+        if (status === 'действительный') return '<span style="color:#2b7a3e;">✅ Действительный</span>';
+        if (status === 'резерв') return '<span style="color:#f4c542;">📋 Резерв</span>';
+        if (status === 'почетный') return '<span style="color:#9b2c2c;">🏅 Почётный</span>';
+        return status;
+    }
+
+    function renderMilitary() {
+        const list = getMilitaryList();
+        
+        const totalCount = list.length;
+        const activeCount = list.filter(item => item.status === 'действительный').length;
+        const reserveCount = list.filter(item => item.status === 'резерв').length;
+        
+        document.getElementById('statsPanel').innerHTML = `
+            <div class="stat-card">
+                <div class="stat-number">${totalCount}</div>
+                <div class="stat-label">👥 Всего</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">${activeCount}</div>
+                <div class="stat-label">✅ Действительных</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">${reserveCount}</div>
+                <div class="stat-label">📋 В резерве</div>
+            </div>
+        `;
+        
+        const tbody = document.getElementById('militaryBody');
+        tbody.innerHTML = '';
+        
+        const deleteHeader = document.getElementById('deleteColHeader');
+        if (deleteHeader) {
+            deleteHeader.style.display = isAdminAuthorized ? 'table-cell' : 'none';
+        }
+        
+        list.forEach((item) => {
+            const row = tbody.insertRow();
+            
+            row.insertCell(0).innerHTML = `<strong>${escapeHtml(item.username)}</strong>`;
+            row.insertCell(1).innerHTML = `<span class="rank-high">${escapeHtml(item.rank)}</span>`;
+            row.insertCell(2).innerHTML = escapeHtml(item.division);
+            row.insertCell(3).innerHTML = item.joinDate;
+            row.insertCell(4).innerHTML = getStatusBadge(item.status);
+            
+            if (isAdminAuthorized) {
+                const deleteCell = row.insertCell(5);
+                deleteCell.style.textAlign = 'center';
+                const deleteBtn = document.createElement('button');
+                deleteBtn.innerHTML = '🗑️ Удалить';
+                deleteBtn.className = 'delete-btn';
+                deleteBtn.onclick = () => {
+                    if (confirm(`Удалить ${item.username} из списка?`)) {
+                        deleteMilitaryById(item.id);
+                    }
+                };
+                deleteCell.appendChild(deleteBtn);
+            }
+        });
+        
+        const adminPanel = document.getElementById('adminPanel');
+        if (isAdminAuthorized) {
+            adminPanel.classList.add('show');
+        } else {
+            adminPanel.classList.remove('show');
+        }
+    }
+    
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+    
+    const modal = document.getElementById('adminModal');
+    
+    function openAdminModal() {
+        modal.style.display = 'flex';
+        document.getElementById('secretCode').value = '';
+        document.getElementById('modalError').innerText = '';
+    }
+    
+    function closeAdminModal() {
+        modal.style.display = 'none';
+    }
+    
+    function checkSecretCode() {
+        const code = document.getElementById('secretCode').value;
+        if (code === ADMIN_SECRET_CODE) {
+            isAdminAuthorized = true;
+            sessionStorage.setItem('remetia_military_auth', 'true');
+            closeAdminModal();
+            renderMilitary();
+            alert('🔓 Админ-панель разблокирована! Теперь вы можете добавлять и удалять должности.');
+        } else {
+            document.getElementById('modalError').innerText = '❌ Неверный код доступа';
+        }
+    }
+    
+    function attachEvents() {
+        document.getElementById('addMilitaryBtn').onclick = () => {
+            if (!isAdminAuthorized) {
+                alert('Нет доступа! Введите секретный код.');
+                openAdminModal();
+                return;
+            }
+            const username = document.getElementById('newUsername').value;
+            const rank = document.getElementById('newRank').value;
+            const division = document.getElementById('newDivision').value;
+            const status = document.getElementById('newStatus').value;
+            
+            if (!username || !rank) {
+                alert('Заполните имя и должность!');
+                return;
+            }
+            
+            addMilitary(username, rank, division, status);
+            
+            document.getElementById('newUsername').value = '';
+            document.getElementById('newRank').value = '';
+            document.getElementById('newDivision').value = '';
+            document.getElementById('newStatus').value = 'действительный';
+            
+            alert(`✅ ${username} добавлен(а) в список!`);
+        };
+        
+        document.getElementById('resetDefaultBtn').onclick = () => {
+            if (!isAdminAuthorized) {
+                alert('Нет доступа! Введите секретный код.');
+                openAdminModal();
+                return;
+            }
+            resetToDefault();
+        };
+        
+        document.getElementById('openAdminModalBtn').onclick = openAdminModal;
+        document.getElementById('submitCodeBtn').onclick = checkSecretCode;
+        document.getElementById('closeModalBtn').onclick = closeAdminModal;
+        
+        window.onclick = (e) => {
+            if (e.target === modal) closeAdminModal();
+        };
+        
+        document.getElementById('secretCode').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') checkSecretCode();
+        });
+    }
+    
+    function init() {
+        renderMilitary();
+        attachEvents();
+    }
+    
+    init();
+</script>
+</body>
+</html>
