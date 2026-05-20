@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Республика Реметия · Официальный портал</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Roboto', 'Georgia', serif;
+            background: linear-gradient(135deg, #f0f4ec 0%, #e2e8db 100%);
+            min-height: 100vh;
+        }
+
+        /* Флаговая полоска */
+        .flag-bar {
+            height: 8px;
+            background: linear-gradient(90deg, #2b7a3e 33%, #f4c542 34%, #f4c542 66%, #9b2c2c 67%);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+        }
+
+        /* Контейнер */
+        .container {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 60px 20px 40px;
+        }
+
+        /* Геральдика */
+        .heraldry {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            padding: 30px 40px;
+            border-radius: 60px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .coat-of-arms {
+            text-align: center;
+        }
+
+        .coat-icon {
+            font-size: 64px;
+            background: #f8f3e0;
+            width: 110px;
+            height: 110px;
+            line-height: 110px;
+            border-radius: 50%;
+            display: inline-block;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+
+        .country-name h1 {
+            font-size: 2.5rem;
+            letter-spacing: 3px;
+            color: #2b7a3e;
+        }
+
+        .country-name p {
+            font-style: italic;
+            color: #6a7c5c;
+            margin-top: 5px;
+        }
+
+        .motto {
+            text-align: right;
+            font-weight: bold;
+            border-left: 4px solid #f4c542;
+            padding-left: 25px;
+        }
+
+        .motto span {
+            font-size: 0.8rem;
+            font-weight: normal;
+            color: #6a7c5c;
+        }
+
+        /* Секции */
+        .section {
+            margin-bottom: 50px;
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            color: #2b7a3e;
+            margin-bottom: 25px;
+            border-left: 6px solid #f4c542;
+            padding-left: 20px;
+        }
+
+        /* Сетка карточек */
+        .grid-3, .grid-2 {
+            display: grid;
+            gap: 25px;
+        }
+
+        .grid-3 {
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        }
+
+        .grid-2 {
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        }
+
+        /* Карточка сервиса */
+        .service-card {
+            background: white;
+            border-radius: 32px;
+            padding: 28px;
+            text-align: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+            text-decoration: none;
+            display: block;
+            border: 1px solid #e0ebd6;
+        }
+
+        .service-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 25px 40px rgba(0,0,0,0.12);
+        }
+
+        .service-icon {
+            font-size: 3.5rem;
+            margin-bottom: 15px;
+        }
+
+        .service-card h3 {
+            color: #2b7a3e;
+            font-size: 1.4rem;
+            margin-bottom: 10px;
+        }
+
+        .service-card p {
+            color: #6a7c5c;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        /* Новости */
+        .news-card {
+            background: white;
+            border-radius: 32px;
+            padding: 25px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+        }
+
+        .news-card h3 {
+            color: #2b7a3e;
+            margin-bottom: 15px;
+            border-left: 4px solid #f4c542;
+            padding-left: 15px;
+        }
+
+        .news-item {
+            border-bottom: 1px solid #e0ebd6;
+            padding: 15px 0;
+        }
+
+        .news-date {
+            color: #9b2c2c;
+            font-size: 0.7rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .news-title {
+            font-weight: bold;
+            margin: 5px 0;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 30px;
+            color: #6a7c5c;
+            border-top: 1px solid #d0dec3;
+            margin-top: 40px;
+            font-size: 0.8rem;
+        }
+
+        .footer a {
+            color: #2b7a3e;
+            text-decoration: none;
+        }
+
+        @media (max-width: 750px) {
+            .heraldry {
+                flex-direction: column;
+                text-align: center;
+            }
+            .motto {
+                border-left: none;
+                text-align: center;
+            }
+            .country-name h1 {
+                font-size: 1.8rem;
+            }
+            .section-title {
+                font-size: 1.4rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="flag-bar"></div>
+
+<div class="container">
+    <!-- Геральдика -->
+    <div class="heraldry">
+        <div class="coat-of-arms">
+            <div class="coat-icon">🦅⚙️🌾</div>
+            <div style="font-size: 0.75rem; color: #6a7c5c; margin-top: 5px;">Государственный герб</div>
+        </div>
+        <div class="country-name">
+            <h1>РЕСПУБЛИКА РЕМЕТИЯ</h1>
+            <p>Res Publica Rhaemetia · Свобода, Земля, Будущее</p>
+        </div>
+        <div class="motto">
+            «Из воли народа — сила державы»<br>
+            <span>Est. 2025</span>
+        </div>
+    </div>
+
+    <!-- Главные сервисы -->
+    <div class="section">
+        <h2 class="section-title">🏛️ Государственные сервисы</h2>
+        <div class="grid-3">
+            <a href="profile.html" class="service-card">
+                <div class="service-icon">👤</div>
+                <h3>Личный кабинет</h3>
+                <p>Вход в банк, кликер, виртуальная карта, переводы по карте RMT</p>
+            </a>
+            <a href="honor.html" class="service-card">
+                <div class="service-icon">🏆</div>
+                <h3>Доска почёта</h3>
+                <p>Награждённые граждане, рейтинг, достижения</p>
+            </a>
+            <a href="military.html" class="service-card">
+                <div class="service-icon">⚔️</div>
+                <h3>Армия и должности</h3>
+                <p>Военнослужащие, управляющие, звания</p>
+            </a>
+        </div>
+    </div>
+
+    <!-- Дополнительные сервисы -->
+    <div class="section">
+        <h2 class="section-title">📚 Информация</h2>
+        <div class="grid-2">
+            <a href="articles.html" class="service-card">
+                <div class="service-icon">📖</div>
+                <h3>Библиотека Реметии</h3>
+                <p>Конституция, история, культура, экономика — всё о нашем государстве</p>
+            </a>
+            <a href="clicker.html" class="service-card">
+                <div class="service-icon">🖱️</div>
+                <h3>RMT Кликер</h3>
+                <p>Игра без регистрации — кликай и зарабатывай Реметы</p>
+            </a>
+        </div>
+    </div>
+
+    <!-- Последние новости -->
+    <div class="section">
+        <h2 class="section-title">📰 Официальные вести</h2>
+        <div class="news-card">
+            <div class="news-item">
+                <div class="news-date">15 мая 2026</div>
+                <div class="news-title">Президент подписала Закон о цифровом гражданстве</div>
+                <p>Граждане Реметии теперь могут получить электронный паспорт. Виртуальное посольство открыто для всех желающих присоединиться.</p>
+            </div>
+            <div class="news-item">
+                <div class="news-date">2 мая 2026</div>
+                <div class="news-title">Реметия присоединилась к «Культурному пакту малых наций»</div>
+                <p>Международное признание: флаг Реметии поднят на онлайн-платформе микрогосударств.</p>
+            </div>
+            <div class="news-item">
+                <div class="news-date">20 апреля 2026</div>
+                <div class="news-title">Урожай-2026: рекорд в виртуальной аграрной зоне</div>
+                <p>Программа «Зелёная Реметия» помогла озеленить 1500 условных гектаров.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Конституция кратко -->
+    <div class="section">
+        <h2 class="section-title">⚖️ Основной закон — 3 столпа Реметии</h2>
+        <div class="grid-3">
+            <div class="service-card" style="text-align: left;">
+                <div style="font-size: 2rem;">🗳️</div>
+                <h3>Народное собрание</h3>
+                <p>Каждый гражданин имеет голос. Законы принимаются открыто.</p>
+            </div>
+            <div class="service-card" style="text-align: left;">
+                <div style="font-size: 2rem;">🌱</div>
+                <h3>Устойчивое развитие</h3>
+                <p>Природа и технологии в гармонии. Нет вредным производствам.</p>
+            </div>
+            <div class="service-card" style="text-align: left;">
+                <div style="font-size: 2rem;">🌍</div>
+                <h3>Открытые границы</h3>
+                <p>Реметия — пространство для творцов, учёных и мечтателей.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        🇷🇪 Республика Реметия — официальный портал<br>
+        Флаг, герб и гимн доступны по запросу в пресс-службу.<br>
+        🕊️ Сделано гражданами для граждан · Хостинг на GitHub Pages<br>
+        <br>
+        <a href="https://github.com/ваш_логин/remetiya" target="_blank">📂 GitHub репозиторий</a>
+    </div>
+</div>
+</body>
+</html>
