@@ -6,7 +6,7 @@
 
 ![Флаг Реметии](https://img.shields.io/badge/Флаг-Зеленый_Желтый_Красный-2b7a3e?style=for-the-badge)
 ![Основана](https://img.shields.io/badge/Основана-12_мая_2025-f4c542?style=for-the-badge)
-![Граждан](https://img.shields.io/badge/Граждан-150+-9b2c2c?style=for-the-badge)
+![Граждан](https://img.shields.io/badge/Граждан-1+-9b2c2c?style=for-the-badge)
 
 </div>
 
