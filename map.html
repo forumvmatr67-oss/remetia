@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Карта Реметии · Районы и жилые зоны</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, #e8efe0 0%, #c8d4bb 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .flag-bar {
+            height: 6px;
+            background: linear-gradient(90deg, #2b7a3e 33%, #f4c542 34%, #f4c542 66%, #9b2c2c 67%);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 60px auto 30px;
+            padding: 0 15px;
+        }
+
+        .nav-back {
+            display: inline-block;
+            margin-bottom: 20px;
+            background: #9b2c2c;
+            padding: 8px 24px;
+            border-radius: 40px;
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        .nav-back:hover {
+            background: #7a2222;
+        }
+
+        .map-header {
+            background: white;
+            border-radius: 40px;
+            padding: 25px 30px;
+            margin-bottom: 25px;
+            text-align: center;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+        }
+
+        .map-header h1 {
+            color: #2b7a3e;
+            font-size: 1.8rem;
+            margin-bottom: 8px;
+        }
+
+        .map-header p {
+            color: #6a7c5c;
+        }
+
+        .map-container {
+            background: #1a3a32;
+            border-radius: 32px;
+            padding: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            margin-bottom: 30px;
+            overflow: auto;
+        }
+
+        .map-canvas {
+            width: 100%;
+            min-width: 1000px;
+            background: #d4e6f1;
+            border-radius: 24px;
+            position: relative;
+            border: 2px solid #f4c542;
+        }
+
+        svg {
+            width: 100%;
+            height: auto;
+            background: linear-gradient(135deg, #c8e6f5 0%, #b2d8e8 100%);
+            border-radius: 20px;
+        }
+
+        .legend {
+            background: white;
+            border-radius: 28px;
+            padding: 20px 25px;
+            margin-top: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .legend-section {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            background: #f8faf5;
+            padding: 12px 20px;
+            border-radius: 24px;
+        }
+
+        .legend-section h4 {
+            color: #2b7a3e;
+            font-size: 0.8rem;
+            margin-bottom: 5px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.8rem;
+        }
+
+        .legend-marker {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+        }
+
+        .legend-marker.capital { background: #9b2c2c; box-shadow: 0 0 0 2px #f4c542; width: 18px; height: 18px; }
+        .legend-marker.city { background: #2b7a3e; }
+        .legend-marker.district { background: #3a7a5a; }
+        .legend-marker.village { background: #6a9c5a; }
+        .legend-marker.landmark { background: #f4c542; }
+        .legend-marker.military { background: #9b2c2c; }
+
+        .info-panel {
+            background: white;
+            border-radius: 28px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .info-panel h3 {
+            color: #2b7a3e;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .region-stats {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .stat {
+            background: #f8f3e0;
+            padding: 8px 18px;
+            border-radius: 40px;
+            font-size: 0.85rem;
+        }
+
+        .district-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .district-item {
+            background: #f0f4ec;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 25px;
+            color: #6a7c5c;
+            font-size: 0.8rem;
+        }
+
+        @media (max-width: 800px) {
+            .map-header h1 { font-size: 1.4rem; }
+            .legend { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+<div class="flag-bar"></div>
+<div class="container">
+    <a href="index.html" class="nav-back">← На главную Реметии</a>
+    
+    <div class="map-header">
+        <h1>🗺️ Карта Республики Реметия</h1>
+        <p>Районы, жилые зоны, города и достопримечательности</p>
+    </div>
+
+    <div class="map-container">
+        <div class="map-canvas">
+            <svg viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid meet">
+                <defs>
+                    <radialGradient id="seaGrad" cx="50%" cy="50%" r="50%">
+                        <stop offset="0%" style="stop-color:#7bc5d9"/>
+                        <stop offset="100%" style="stop-color:#4a9eb8"/>
+                    </radialGradient>
+                    <filter id="glow">
+                        <feGaussianBlur stdDeviation="2" result="blur"/>
+                        <feMerge>
+                            <feMergeNode in="blur"/>
+                            <feMergeNode in="SourceGraphic"/>
+                        </feMerge>
+                    </filter>
+                </defs>
+                
+                <!-- Океан -->
+                <rect width="1200" height="800" fill="url(#seaGrad)"/>
+                
+                <!-- Основной континент -->
+                <path d="M100,100 L200,60 L350,70 L500,50 L650,60 L800,70 L950,80 L1100,90 L1150,130 L1120,180 L1050,200 L980,220 L900,250 L850,300 L800,350 L750,400 L700,450 L650,500 L600,550 L550,580 L500,600 L450,590 L400,560 L350,520 L300,480 L250,450 L200,420 L150,380 L100,330 L60,280 L50,220 L60,160 L100,100Z" 
+                      fill="#8fbc6e" stroke="#5a8a3a" stroke-width="2" opacity="0.85"/>
+                
+                <!-- Остров Реметия (основная территория) -->
+                <ellipse cx="550" cy="350" rx="180" ry="120" fill="#7aaa5a" stroke="#2b7a3e" stroke-width="2.5" opacity="0.7"/>
+                <text x="550" y="340" text-anchor="middle" font-size="18" fill="#2b7a3e" font-weight="bold" opacity="0.6">🏝️</text>
+                <text x="550" y="360" text-anchor="middle" font-size="11" fill="#2b7a3e" font-weight="bold" opacity="0.8">ОСТРОВ РЕМЕТИЯ</text>
+                
+                <!-- ========== ЖИЛЫЕ РАЙОНЫ И КВАРТАЛЫ ========== -->
+                
+                <!-- Центральный район (столица) -->
+                <rect x="500" y="310" width="100" height="80" rx="10" fill="#2b7a3e" opacity="0.15" stroke="#2b7a3e" stroke-width="1" stroke-dasharray="4,2"/>
+                <text x="550" y="355" text-anchor="middle" font-size="9" fill="#2b7a3e" font-weight="bold">ЦЕНТРАЛЬНЫЙ РАЙОН</text>
+                
+                <!-- Северный жилой массив -->
+                <rect x="520" y="240" width="80" height="60" rx="8" fill="#3a7a5a" opacity="0.15" stroke="#3a7a5a" stroke-width="1" stroke-dasharray="3,2"/>
+                <text x="560" y="270" text-anchor="middle" font-size="8" fill="#3a7a5a">Северный жилой</text>
+                
+                <!-- Южный жилой массив -->
+                <rect x="520" y="400" width="80" height="55" rx="8" fill="#3a7a5a" opacity="0.15" stroke="#3a7a5a" stroke-width="1" stroke-dasharray="3,2"/>
+                <text x="560" y="430" text-anchor="middle" font-size="8" fill="#3a7a5a">Южный жилой</text>
+                
+                <!-- Восточный район -->
+                <rect x="620" y="320" width="70" height="55" rx="8" fill="#3a7a5a" opacity="0.15" stroke="#3a7a5a" stroke-width="1" stroke-dasharray="3,2"/>
+                <text x="655" y="345" text-anchor="middle" font-size="8" fill="#3a7a5a">Восточный</text>
+                
+                <!-- Западный район -->
+                <rect x="420" y="320" width="70" height="55" rx="8" fill="#3a7a5a" opacity="0.15" stroke="#3a7a5a" stroke-width="1" stroke-dasharray="3,2"/>
+                <text x="455" y="345" text-anchor="middle" font-size="8" fill="#3a7a5a">Западный</text>
+                
+                <!-- ========== ЖИЛЫЕ КВАРТАЛЫ РЕМ-СИТИ ========== -->
+                <rect x="530" y="330" width="20" height="15" rx="3" fill="#5a9a6a" opacity="0.3" stroke="#5a9a6a" stroke-width="0.5"/>
+                <rect x="555" y="330" width="20" height="15" rx="3" fill="#5a9a6a" opacity="0.3" stroke="#5a9a6a" stroke-width="0.5"/>
+                <rect x="530" y="350" width="20" height="15" rx="3" fill="#5a9a6a" opacity="0.3" stroke="#5a9a6a" stroke-width="0.5"/>
+                <rect x="555" y="350" width="20" height="15" rx="3" fill="#5a9a6a" opacity="0.3" stroke="#5a9a6a" stroke-width="0.5"/>
+                <text x="555" y="378" text-anchor="middle" font-size="7" fill="#5a9a6a">кварталы</text>
+                
+                <!-- ========== ОТДЕЛЬНЫЕ ЖИЛЫЕ ЗОНЫ (посёлки) ========== -->
+                
+                <!-- 🌳 Жилой комплекс "Зелёная долина" -->
+                <circle cx="470" cy="380" r="4" fill="#6a9c5a"/>
+                <text x="460" y="375" font-size="8" fill="#6a9c5a">Зелёная долина</text>
+                
+                <!-- 🏡 Коттеджный посёлок "Реметский" -->
+                <circle cx="630" cy="380" r="4" fill="#6a9c5a"/>
+                <text x="635" y="375" font-size="8" fill="#6a9c5a">Реметский пос.</text>
+                
+                <!-- 🏘️ Посёлок "Приозёрный" -->
+                <circle cx="450" cy="420" r="4" fill="#6a9c5a"/>
+                <text x="440" y="415" font-size="8" fill="#6a9c5a">Приозёрный</text>
+                
+                <!-- 🏘️ Посёлок "Луговой" -->
+                <circle cx="640" cy="300" r="4" fill="#6a9c5a"/>
+                <text x="645" y="295" font-size="8" fill="#6a9c5a">Луговой</text>
+                
+                <!-- 🏘️ Посёлок "Солнечный" -->
+                <circle cx="580" cy="280" r="4" fill="#6a9c5a"/>
+                <text x="585" y="275" font-size="8" fill="#6a9c5a">Солнечный</text>
+                
+                <!-- 🏘️ Посёлок "Тихий" -->
+                <circle cx="500" cy="290" r="4" fill="#6a9c5a"/>
+                <text x="490" y="285" font-size="8" fill="#6a9c5a">Тихий</text>
+                
+                <!-- 🏘️ Посёлок "Рыбацкий" -->
+                <circle cx="680" cy="370" r="4" fill="#6a9c5a"/>
+                <text x="685" y="365" font-size="8" fill="#6a9c5a">Рыбацкий</text>
+                
+                <!-- ========== НОВЫЕ ПОСЁЛКИ ========== -->
+                <circle cx="400" cy="350" r="4" fill="#6a9c5a"/>
+                <text x="390" y="345" font-size="8" fill="#6a9c5a">Сосновка</text>
+                
+                <circle cx="700" cy="340" r="4" fill="#6a9c5a"/>
+                <text x="705" y="335" font-size="8" fill="#6a9c5a">Берёзовка</text>
+                
+                <circle cx="550" cy="450" r="4" fill="#6a9c5a"/>
+                <text x="555" y="445" font-size="8" fill="#6a9c5a">Речной</text>
+                
+                <circle cx="480" cy="260" r="4" fill="#6a9c5a"/>
+                <text x="470" y="255" font-size="8" fill="#6a9c5a">Холмистый</text>
+                
+                <circle cx="620" cy="250" r="4" fill="#6a9c5a"/>
+                <text x="625" y="245" font-size="8" fill="#6a9c5a">Дубки</text>
+                
+                <circle cx="430" cy="300" r="4" fill="#6a9c5a"/>
+                <text x="420" y="295" font-size="8" fill="#6a9c5a">Ясеневый</text>
+                
+                <!-- ========== ГОРОДА ========== -->
+                
+                <!-- 🌟 СТОЛИЦА РЕМ-СИТИ -->
+                <circle cx="550" cy="350" r="14" fill="#9b2c2c" stroke="#f4c542" stroke-width="3" filter="url(#glow)"/>
+                <text x="550" y="330" text-anchor="middle" font-size="16" fill="#9b2c2c">🏛️</text>
+                <text x="550" y="375" text-anchor="middle" font-size="12" font-weight="bold" fill="#9b2c2c">РЕМ-СИТИ</text>
+                <text x="550" y="388" text-anchor="middle" font-size="9" fill="#6a7c5c">столица · 85 000 жителей</text>
+                
+                <!-- 🏙️ Порт Северный -->
+                <circle cx="650" cy="420" r="7" fill="#2b7a3e"/>
+                <text x="655" y="415" font-size="10" font-weight="bold" fill="#2b7a3e">Порт Северный</text>
+                <text x="655" y="428" font-size="8" fill="#6a7c5c">28 000 жит.</text>
+                
+                <!-- 🏙️ Зерноград -->
+                <circle cx="450" cy="310" r="7" fill="#2b7a3e"/>
+                <text x="445" y="300" font-size="10" font-weight="bold" fill="#2b7a3e">Зерноград</text>
+                <text x="445" y="312" font-size="8" fill="#6a7c5c">22 000 жит.</text>
+                
+                <!-- 🏙️ Горный -->
+                <circle cx="620" cy="280" r="6" fill="#2b7a3e"/>
+                <text x="625" y="270" font-size="10" font-weight="bold" fill="#2b7a3e">Горный</text>
+                <text x="625" y="282" font-size="8" fill="#6a7c5c">15 000 жит.</text>
+                
+                <!-- 🏙️ Курортный -->
+                <circle cx="500" cy="450" r="6" fill="#2b7a3e"/>
+                <text x="505" y="445" font-size="10" font-weight="bold" fill="#2b7a3e">Курортный</text>
+                <text x="505" y="458" font-size="8" fill="#6a7c5c">12 000 жит.</text>
+                
+                <!-- 🏙️ Новый город Академический -->
+                <circle cx="580" cy="420" r="6" fill="#2b7a3e"/>
+                <text x="585" y="410" font-size="10" font-weight="bold" fill="#2b7a3e">Академический</text>
+                <text x="585" y="422" font-size="8" fill="#6a7c5c">8 000 жит.</text>
+                
+                <!-- ========== ДОСТОПРИМЕЧАТЕЛЬНОСТИ ========== -->
+                
+                <!-- 🏰 Крепость "Звезда" -->
+                <text x="420" y="370" font-size="20" opacity="0.9">🏰</text>
+                <text x="415" y="362" font-size="9" fill="#f4c542" font-weight="bold">Крепость "Звезда"</text>
+                
+                <!-- ⛩️ Храм Солнца -->
+                <text x="650" y="310" font-size="20" opacity="0.9">⛩️</text>
+                <text x="648" y="302" font-size="9" fill="#f4c542" font-weight="bold">Храм Солнца</text>
+                
+                <!-- 🌊 Долина ветров -->
+                <text x="520" y="250" font-size="22" opacity="0.6">🌀</text>
+                <text x="515" y="242" font-size="8" fill="#6a7c5c" font-weight="bold">Долина ветров</text>
+                
+                <!-- 💎 Алмазные копи -->
+                <text x="680" y="290" font-size="18" opacity="0.7">💎</text>
+                <text x="678" y="282" font-size="8" fill="#6a7c5c">Алмазные копи</text>
+                
+                <!-- 🏞️ Национальный парк -->
+                <ellipse cx="480" cy="280" rx="30" ry="20" fill="none" stroke="#2b7a3e" stroke-width="1" stroke-dasharray="3,2" opacity="0.4"/>
+                <text x="480" y="275" text-anchor="middle" font-size="8" fill="#2b7a3e">🌲 Нацпарк "Реметия"</text>
+                
+                <!-- ⛰️ Гора Вершина -->
+                <polygon points="590,230 600,195 610,230" fill="#a0a0a0" stroke="#808080" stroke-width="1"/>
+                <text x="600" y="228" text-anchor="middle" font-size="7" fill="#808080">г.Вершина</text>
+                <text x="600" y="238" text-anchor="middle" font-size="6" fill="#aaa">1847м</text>
+                
+                <!-- 🏖️ Пляж "Золотой берег" -->
+                <text x="680" y="430" font-size="16">🏖️</text>
+                <text x="678" y="440" font-size="7" fill="#f4c542">Золотой берег</text>
+                
+                <!-- 🎡 Парк развлечений -->
+                <text x="530" y="390" font-size="16">🎡</text>
+                <text x="525" y="398" font-size="7" fill="#f4c542">Парк "Реметия"</text>
+                
+                <!-- ========== ИНФРАСТРУКТУРА ========== -->
+                
+                <!-- 🚢 Военная база "Гранит" -->
+                <circle cx="700" cy="380" r="5" fill="#9b2c2c"/>
+                <text x="710" y="375" font-size="8" font-weight="bold" fill="#9b2c2c">база "Гранит"</text>
+                
+                <!-- 🏭 Промышленная зона -->
+                <rect x="390" y="390" width="50" height="30" rx="5" fill="#888" opacity="0.2" stroke="#888" stroke-width="1"/>
+                <text x="415" y="410" text-anchor="middle" font-size="7" fill="#888">промзона</text>
+                
+                <!-- 🌾 Сельхозугодья -->
+                <rect x="350" y="270" width="60" height="40" rx="5" fill="#c4a86b" opacity="0.2" stroke="#c4a86b" stroke-width="1" stroke-dasharray="3,2"/>
+                <text x="380" y="298" text-anchor="middle" font-size="7" fill="#c4a86b">сельхозугодья</text>
+                
+                <!-- ========== ПРИРОДНЫЕ ОБЪЕКТЫ ========== -->
+                
+                <!-- 💧 Озеро Серебряное -->
+                <ellipse cx="430" cy="400" rx="15" ry="10" fill="#7bc5d9" stroke="#4a9eb8" stroke-width="1" opacity="0.8"/>
+                <text x="425" y="398" font-size="7" fill="#2d6a7a">оз.Серебряное</text>
+                
+                <!-- 💧 Озеро Глубокое -->
+                <ellipse cx="680" cy="340" rx="12" ry="8" fill="#7bc5d9" stroke="#4a9eb8" stroke-width="1" opacity="0.8"/>
+                <text x="685" y="338" font-size="7" fill="#2d6a7a">оз.Глубокое</text>
+                
+                <!-- 🌊 Река Рем -->
+                <path d="M430,370 Q470,390 500,380 Q540,370 570,390 Q600,400 640,395" fill="none" stroke="#5bb5d0" stroke-width="3" opacity="0.7"/>
+                <text x="535" y="385" font-size="8" fill="#5bb5d0" font-style="italic">р. Рем</text>
+                
+                <!-- 🌊 Река Северная -->
+                <path d="M520,260 Q550,250 580,255 Q610,260 630,270" fill="none" stroke="#5bb5d0" stroke-width="2" opacity="0.6"/>
+                <text x="575" y="258" font-size="7" fill="#5bb5d0" font-style="italic">Сев. река</text>
+                
+                <!-- ========== ДИПЛОМАТИЯ ========== -->
+                
+                <!-- Посольство Верии -->
+                <circle cx="280" cy="250" r="5" fill="#f4c542"/>
+                <text x="275" y="242" font-size="9" fill="#f4c542" font-weight="bold">Верия</text>
+                <text x="275" y="255" font-size="7" fill="#6a7c5c">посольство</text>
+                
+                <!-- Представительство в Нетландии -->
+                <circle cx="850" cy="200" r="5" fill="#f4c542"/>
+                <text x="845" y="192" font-size="9" fill="#f4c542">Нетландия</text>
+                
+                <!-- ========== ТРАНСПОРТ ========== -->
+                
+                <!-- Главная автомагистраль -->
+                <path d="M450,350 L550,350 L650,370" fill="none" stroke="#9b2c2c" stroke-width="2" stroke-dasharray="8,4" opacity="0.5"/>
+                <text x="555" y="342" text-anchor="middle" font-size="7" fill="#9b2c2c" opacity="0.6">М-1 "Центральная"</text>
+                
+                <!-- Железная дорога -->
+                <path d="M470,360 L520,380 L580,390 L630,380" fill="none" stroke="#666" stroke-width="1.5" stroke-dasharray="2,2" opacity="0.4"/>
+                <text x="545" y="390" text-anchor="middle" font-size="6" fill="#666" opacity="0.5">Ж/Д</text>
+                
+                <!-- Компас -->
+                <g transform="translate(60,80)">
+                    <circle cx="0" cy="0" r="25" fill="white" stroke="#9b2c2c" stroke-width="2" opacity="0.9"/>
+                    <polygon points="0,-22 -5,-6 5,-6" fill="#9b2c2c"/>
+                    <polygon points="0,22 -4,6 4,6" fill="#6a7c5c"/>
+                    <polygon points="-22,0 -6,-4 -6,4" fill="#6a7c5c"/>
+                    <polygon points="22,0 6,-4 6,4" fill="#6a7c5c"/>
+                    <text x="0" y="-28" text-anchor="middle" font-size="10" fill="#2b7a3e" font-weight="bold">N</text>
+                    <text x="0" y="35" text-anchor="middle" font-size="8" fill="#6a7c5c">С</text>
+                    <text x="35" y="4" text-anchor="middle" font-size="8" fill="#6a7c5c">В</text>
+                    <text x="-35" y="4" text-anchor="middle" font-size="8" fill="#6a7c5c">З</text>
+                    <text x="0" y="4" text-anchor="middle" font-size="8" fill="#6a7c5c">Ю</text>
+                </g>
+                
+                <!-- Масштаб -->
+                <g transform="translate(900,740)">
+                    <line x1="0" y1="0" x2="100" y2="0" stroke="#2b7a3e" stroke-width="2"/>
+                    <line x1="0" y1="-3" x2="0" y2="3" stroke="#2b7a3e" stroke-width="1.5"/>
+                    <line x1="50" y1="-2" x2="50" y2="2" stroke="#2b7a3e" stroke-width="1"/>
+                    <line x1="100" y1="-3" x2="100" y2="3" stroke="#2b7a3e" stroke-width="1.5"/>
+                    <text x="50" y="12" text-anchor="middle" font-size="8" fill="#2b7a3e">10 км</text>
+                </g>
+            </svg>
+        </div>
+    </div>
+
+    <!-- Легенда -->
+    <div class="legend">
+        <div class="legend-section">
+            <h4>🏙️ Города и районы</h4>
+            <div class="legend-item"><div class="legend-marker capital"></div><span>Столица (85 000 жит.)</span></div>
+            <div class="legend-item"><div class="legend-marker city"></div><span>Город (8 000–28 000 жит.)</span></div>
+            <div class="legend-item"><div class="legend-marker district"></div><span>Жилой район / квартал</span></div>
+            <div class="legend-item"><div class="legend-marker village"></div><span>Посёлок / жилая зона</span></div>
+        </div>
+        <div class="legend-section">
+            <h4>⭐ Достопримечательности</h4>
+            <div class="legend-item"><div class="legend-marker landmark"></div><span>Историческое место</span></div>
+            <div class="legend-item"><span>🏰</span><span>Крепость / Храм</span></div>
+            <div class="legend-item"><span>🌲</span><span>Национальный парк</span></div>
+            <div class="legend-item"><span>🏖️</span><span>Пляж / курорт</span></div>
+        </div>
+        <div class="legend-section">
+            <h4>⚙️ Инфраструктура</h4>
+            <div class="legend-item"><div class="legend-marker military"></div><span>Военный объект</span></div>
+            <div class="legend-item"><span>🏭</span><span>Промышленная зона</span></div>
+            <div class="legend-item"><span>🚢</span><span>Порт / база</span></div>
+            <div class="legend-item"><span>🛣️</span><span>Автомагистраль</span></div>
+        </div>
+        <div class="legend-section">
+            <h4>🌿 Природа</h4>
+            <div class="legend-item"><span>💧</span><span>Озеро</span></div>
+            <div class="legend-item"><span>🌊</span><span>Река</span></div>
+            <div class="legend-item"><span>⛰️</span><span>Гора</span></div>
+            <div class="legend-item"><span>🌀</span><span>Долина ветров</span></div>
+        </div>
+    </div>
+
+    <!-- Инфо-панель со списком всех районов -->
+    <div class="info-panel">
+        <h3>📍 Жилые зоны и районы Реметии</h3>
+        <div class="district-list">
+            <div class="district-item"><span>🏛️</span> Центральный район (Рем-сити)</div>
+            <div class="district-item"><span>🏘️</span> Северный жилой массив</div>
+            <div class="district-item"><span>🏘️</span> Южный жилой массив</div>
+            <div class="district-item"><span>🏘️</span> Восточный район</div>
+            <div class="district-item"><span>🏘️</span> Западный район</div>
+            <div class="district-item"><span>🌳</span> ЖК "Зелёная долина"</div>
+            <div class="district-item"><span>🏡</span> Коттеджный посёлок "Реметский"</div>
+            <div class="district-item"><span>🏘️</span> Посёлок "Приозёрный"</div>
+            <div class="district-item"><span>🏘️</span> Посёлок "Луговой"</div>
+            <div class="district-item"><span>☀️</span> Посёлок "Солнечный"</div>
+            <div class="district-item"><span>🏘️</span> Посёлок "Тихий"</div>
+            <div class="district-item"><span>🎣</span> Посёлок "Рыбацкий"</div>
+            <div class="district-item"><span>🌲</span> Посёлок "Сосновка"</div>
+            <div class="district-item"><span>🌿</span> Посёлок "Берёзовка"</div>
+            <div class="district-item"><span>🏞️</span> Посёлок "Речной"</div>
+            <div class="district-item"><span>⛰️</span> Посёлок "Холмистый"</div>
+            <div class="district-item"><span>🍂</span> Посёлок "Дубки"</div>
+            <div class="district-item"><span>🍃</span> Посёлок "Ясеневый"</div>
+        </div>
+        
+        <div class="region-stats" style="margin-top: 20px;">
+            <div class="stat">🏙️ 5 городов</div>
+            <div class="stat">🏘️ 18 жилых зон и районов</div>
+            <div class="stat">👥 Общее население: ~185 000 жит.</div>
+            <div class="stat">📐 Площадь острова: ~850 км²</div>
+        </div>
+    </div>
+
+    <footer>
+        🇷🇪 Официальная карта Республики Реметия · По состоянию на 2026 год<br>
+        На карте отмечены все жилые районы, города и инфраструктурные объекты
+    </footer>
+</div>
+</body>
+</html>
